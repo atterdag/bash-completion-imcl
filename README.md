@@ -11,12 +11,19 @@ cat > /etc/profile.d/imcl_path.sh << EOF
 test \$UID -lt 100 && PATH=\${PATH}:/opt/IBM/InstallationManager/eclipse/tools
 export PATH
 EOF
-. /etc/profile.d/imcl_path.sh
 ```
 
 Then download, and copy imcl to */etc/bash_completion.d/*
 
-```wget -O /etc/bash_completion.d/imcl "https://raw.githubusercontent.com/atterdag/bash-completion-imcl/master/imcl"```
+```
+wget -O /etc/bash_completion.d/imcl "https://raw.githubusercontent.com/atterdag/bash-completion-imcl/master/imcl"
+```
+
+Each time you log in the two files will be sourced in to your bash shell, but for now just source them manually.
+```
+. /etc/profile.d/imcl_path.sh
+. /etc/bash_completion.d/imcl
+```
 
 ## Usage
 The completion supports all imcl commands, and parameters. It allows you to set strings such as for product IDs, preferences, and properties, and knows when you need to navigate to a file, or a directory.
