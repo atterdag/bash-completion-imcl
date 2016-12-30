@@ -1,0 +1,495 @@
+#!bash
+#
+# DESCRIPTION: bash completion script for IBM Installation Manager CL tool
+# AUTHOR: atterdag AKA Valdemar Lemche <valdemar@lemche.net>
+#
+
+_imcl()
+{
+	# Save COMP_LINE as a array so we can process imcl commands, and their parameters
+	local COMP_LINES=($COMP_LINE)
+
+	#local cur=${COMP_WORDS[COMP_CWORD]}
+	local cur prev words cword
+	_init_completion -n : || return
+
+	# Generated list of commands with "imcl help | grep -v "^ " | sed 's/  .*//g' | sed 's/,//g'"
+	local COMMANDS="help -help -h -?
+			generateResponseFile
+			import
+			input -input
+			install
+			listAvailableFixes
+			listAvailablePackages
+			listInstallationDirectories
+			listInstalledFeatures
+			listInstalledPackages
+			modify
+			rollback
+			uninstall
+			uninstallAll
+			updateAll -updateAll
+			version -version
+			viewLicense
+			viewLog
+			-acceptLicense
+			-accessRights -aR
+			-consoleMode -c
+			-dataLocation -dL
+			-log -l
+			-masterPasswordFile -mPF
+			-nl
+			-passwordKey -pK
+			-preferences
+			-record
+			-secureStorageFile -sSF
+			-showProgress -sP
+			-showVerboseProgress -sVP
+			-silent -s
+			-stopBlockingProcesses
+			-url"
+
+	# I have to use this construction because $prev always refers to the last word on the command line, and I need identify the imcl command.
+	case ${COMP_LINES[1]} in
+		help|-help|-h|-?)
+			PARAMETERS="all $COMMANDS"
+			for PARAMETER in $PARAMETERS; do
+				if [ "$PARAMETER" == "${COMP_LINES[2]}" ]; then
+					return 0
+				fi
+			done
+			COMPREPLY=( $(compgen -W "${COMMANDS[*]}" -- $cur) )
+			return 0
+			;;
+		generateResponseFile)
+			# echo "<packageId(_Version)>..."; imcl help generateResponseFile | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<packageId(_Version)>...
+						-connectPassportAdvantage -cPA
+						-installationDirectory -iD
+						-masterPasswordFile -mPF
+						-output
+						-preferences
+						-prompt
+						-repositories
+						-secureStorageFile -sSF
+						-useServiceRepository -uSR"
+			case $prev in
+				-installationDirectory|-iD|-repositories)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-output|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		import)
+			# imcl help import | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="-eclipseLocation
+						-installationDirectory -iD
+						-masterPasswordFile -mPF
+						-preferences
+						-prompt
+						-properties
+						-repositories
+						-secureStorageFile -sSF
+						-sharedResourcesDirectory -sRD"
+			case $prev in
+				-eclipseLocation|-installationDirectory|-iD|-repositories|-sharedResourcesDirectory|-sRD)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		input|-input)
+			# echo "<response file>"; imcl help input | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<response file>
+						-installationDirectory -iD
+						-masterPasswordFile -mPF
+						-prompt
+						-secureStorageFile -sSF
+						-variables"
+			case $prev in
+				-installationDirectory|-iD)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		install)
+			# echo "<packageId(_Version)(,featureN,featureM,...)>..."; imcl help install | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<packageId(_Version)(,featureN,featureM,...)>...
+						-connectPassportAdvantage -cPA
+						-eclipseLocation
+						-installationDirectory -iD
+						-installFixes -iF
+						-masterPasswordFile -mPF
+						-preferences
+						-prompt
+						-properties
+						-repositories
+						-secureStorageFile -sSF
+						-sharedResourcesDirectory -sRD
+						-useServiceRepository -uSR"
+			case $prev in
+				-eclipseLocation|-installationDirectory|-iD|-repositories|-sharedResourcesDirectory|-sRD)
+					_filedir -d
+					return 0
+					;;
+				-installFixes|-iF)
+					COMPREPLY=( $(compgen -W "none recommended all" -- $cur ) )
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		listAvailableFixes)
+			# echo "<id>_<version>"; imcl help listAvailableFixes | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<id>_<version>
+						-connectPassportAdvantage -cPA
+						-long
+						-masterPasswordFile -mPF
+						-preferences
+						-prompt
+						-repositories
+						-secureStorageFile -sSF
+						-showPlatforms
+						-useServiceRepository -uSR"
+			case $prev in
+				-repositories)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		listAvailablePackages)
+			# imcl help listAvailablePackages | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="-connectPassportAdvantage -cPA
+						-features
+						-long
+						-masterPasswordFile -mPF
+						-preferences
+						-prompt
+						-repositories
+						-secureStorageFile -sSF
+						-showPlatforms
+						-showUpdateFromVersion
+						-useServiceRepository -uSR"
+			case $prev in
+				-repositories)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		listInstallationDirectories)
+			# imcl help listInstallationDirectories | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="-long
+						-verbose"
+			case $prev in
+				-long|-verbose)
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		listInstalledFeatures)
+			# echo "<id>_<version>"; imcl help listInstalledFeatures | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<id>_<version>
+						-installationDirectory -iD
+						-long"
+			case $prev in
+				-installationDirectory|-iD)
+					_filedir -d
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		listInstalledPackages)
+			# imcl help listInstalledPackages | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="-features
+						-installationDirectory -iD
+						-long
+						-rollbackVersions
+						-verbose"
+			case $prev in
+				-installationDirectory|-iD)
+					_filedir -d
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		modify)
+			# echo "<packageID(_Version)>"; imcl help modify | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<packageID(_Version)>
+						-addFeatures
+						-connectPassportAdvantage -cPA
+						-installationDirectory -iD
+						-masterPasswordFile -mPF
+						-prompt
+						-properties
+						-removeFeatures
+						-repositories
+						-secureStorageFile -sSF
+						-useServiceRepository -uSR"
+			case $prev in
+				-installationDirectory|-iD|-repositories)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		rollback)
+			# echo "<packageID(_Version)>..."; imcl help rollback | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<packageID(_Version)>...
+						-connectPassportAdvantage -cPA
+						-installationDirectory -iD
+						-masterPasswordFile -mPF
+						-prompt
+						-properties
+						-repositories
+						-secureStorageFile -sSF
+						-useServiceRepository -uSR"
+			case $prev in
+				-installationDirectory|-iD|-repositories)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		uninstall)
+			# echo "<packageId(_Version)(,featureN,featureM,...)>..."; imcl help uninstall | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<packageId(_Version)(,featureN,featureM,...)>...
+						-installationDirectory -iD
+						-preferences
+						-properties"
+			case $prev in
+				-installationDirectory|-iD)
+					_filedir -d
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		uninstallAll)
+			# imcl help uninstallAll | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="-installationDirectory -iD
+						-properties"
+			case $prev in
+				-installationDirectory|-iD)
+					_filedir -d
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		updateAll|-updateAll)
+			# imcl help updateAll | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="-connectPassportAdvantage -cPA
+						-installationDirectory -iD
+						-installFixes -iF
+						-masterPasswordFile -mPF
+						-prompt
+						-properties
+						-repositories
+						-secureStorageFile -sSF
+						-useServiceRepository -uSR"
+			case $prev in
+				-installationDirectory|-iD|-repositories)
+					_filedir -d
+					return 0
+					;;
+				-installFixes|-iF)
+					COMPREPLY=( $(compgen -W "none recommended all" -- $cur ) )
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		version|-version)
+			return 0
+			;;
+		viewLicense)
+			# echo "<packageID(_Version)>"; imcl help viewLicense | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="<packageID(_Version)>
+						-connectPassportAdvantage -cPA
+						-masterPasswordFile -mPF
+						-preferences
+						-prompt
+						-repositories
+						-secureStorageFile -sSF
+						-useServiceRepository -uSR"
+			case $prev in
+				-repositories)
+					_filedir -d
+					return 0
+					;;
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		viewLog)
+			_filedir
+			return 0
+			;;
+		-accessRights|-aR)
+			COMPREPLY=( $(compgen -W "admin nonAdmin group" -- $cur ) )
+			return 0
+			;;
+		-consoleMode|-c)
+			# echo "imcl help -consoleMode | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
+			PARAMETERS="-masterPasswordFile -mPF
+						-secureStorageFile -sSF"
+			case $prev in
+				-masterPasswordFile|-mPF|-secureStorageFile|-sSF)
+					_filedir
+					return 0
+					;;
+				*)
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					return 0
+					;;
+			esac
+			;;
+		-dataLocation|-dL|-url)
+			_filedir -d
+			return 0
+			;;
+		-log|-l|-masterPasswordFile|-mPF|-passwordKey|-pK|-record|-secureStorageFile|-sSF)
+			_filedir
+			return 0
+			;;
+		-nl)
+			# imcl help -nl | grep \* | sed 's/^.*(//g' | sed 's/)$//g'
+			LANGUAGES="ar
+					   pt_BR
+					   hr
+					   cs
+					   da
+					   nl
+					   en
+					   fi
+					   fr
+					   de
+					   el
+					   iw
+					   hu
+					   in
+					   it
+					   ja
+					   ko
+					   lt
+					   no
+					   pl
+					   ru
+					   zh
+					   sk
+					   sl
+					   es
+					   sv
+					   th
+					   zh_TW
+					   zh_HK
+					   tr"
+			COMPREPLY=( $(compgen -W "${LANGUAGES[*]}" -- $cur) )
+			return 0
+			;;
+		*)
+			COMPREPLY=( $(compgen -W "${COMMANDS[*]}" -- $cur) )
+			return 0
+			;;
+	esac
+} &&
+complete -F _imcl imcl
+
+# ex: ts=4 sw=4 et filetype=sh
