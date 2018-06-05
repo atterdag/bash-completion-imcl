@@ -31,8 +31,9 @@ _imcl()
 			updateAll -updateAll
 			version -version
 			viewLicense
-			viewLog
-			-acceptLicense
+			viewLog"
+
+	local SWITCHES="-acceptLicense
 			-accessRights -aR
 			-consoleMode -c
 			-dataLocation -dL
@@ -140,6 +141,7 @@ _imcl()
 		install)
 			# echo "<packageId(_Version)(,featureN,featureM,...)>..."; imcl help install | grep "    -" | sed 's/^\s\s\s\s//' | sed 's/\s\s.*//g' | sed 's/,\s/ /g'
 			PARAMETERS="<packageId(_Version)(,featureN,featureM,...)>...
+				    -acceptLicense
 				    -connectPassportAdvantage -cPA
 				    -eclipseLocation
 				    -installationDirectory -iD
@@ -166,7 +168,7 @@ _imcl()
 					return 0
 					;;
 				*)
-					COMPREPLY=( $(compgen -W "${PARAMETERS[*]}" -- $cur) )
+					COMPREPLY=( $(compgen -W "${PARAMETERS[*]} ${SWITCHES[*]}" -- $cur) )
 					return 0
 					;;
 			esac
